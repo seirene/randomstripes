@@ -31,97 +31,119 @@
     <!-- Include all compiled plugins (below), or include individual files as needed -->
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
 	<script src="vendor/colpick.js" type="text/javascript"></script>
+	<script src="vendor/random.min.js" type="text/javascript"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.7.0/underscore-min.js"></script>
+ 
+	<div>This is a random stripe pattern generator for knitting and crochet works.
+	The inspiration came from <a href="http://www.biscuitsandjam.com/stripe_maker.php"> Biscuits and Jam 
+	stripe generator</a>, but I found hard to use and it didn't match my need. So 
+	I decided to make my own pattern generator. I'd love to hear if you actually use my generator for any projects 
+	so please let me know!
+	</div>
  
 	<div class="row" id="pickers">
 		<div class="col-xs-2 col-md-1 colorlabel">
-			<div id="picker1" class="colorpicker" ><i class="glyphicon glyphicon-edit"></i> </div>
+			<div id="picker0" class="colorpicker" ><i class="glyphicon glyphicon-edit"></i> </div>
 			Color 1
 		</div>
 		<div class="col-xs-2 col-md-1 colorlabel">			
-			<div id="picker2" class="colorpicker" ><i class="glyphicon glyphicon-edit"></i> </div>			
+			<div id="picker1" class="colorpicker" ><i class="glyphicon glyphicon-edit"></i> </div>			
 			Color 2
 		</div>
 	</div>
-	<div class="form-group">
+	
+	<h3 data-target="#settings" data-toggle="collapse">Settings</h3>
+	<div class="form-group collapse in" id="settings">
 		<input type="text" id="nrows" value="100" size="3" maxlength="3" class="form-control"> rows
 	</div>
+	
+	<div class="container">
 	<div class="row">
+	<h3 data-target="#pattern" data-toggle="collapse">Pattern Preview</h3>
 		<div id="pattern" class="col-xs-12">
 		</div>
-		<div id="instructions" class="col-xs-12">
+	<h3 data-target="#instructions" data-toggle="collapse">Instructions</h3>
+		<div id="instructions" class="collapse in">
 		</div>
+	</div>
 	</div>
 	<script type="text/javascript">
 $("document").ready(function(){
 	var color1 = "1b9117";
 	var color2 = "b3e8dc";
+	var model = {
+		colors: [
+			{color:"1b9117", weight:1}, 
+			{color:"b3e8dc", weight:1}
+		],
+		rows: [],
+		nrows: 100,
+		seed: (new Date).getTime()
+	};
 	
-	$('#picker1').colpick({
-		layout:'hex',
-		submit:0,
-		color: color1,
-		onChange: function (hsb,hex,rgb,el){
-			$(el).css('background-color', '#'+hex);
-			$(".row-1").css('background-color', '#'+hex);
-		}
-	}).keyup(function(){
-		$(this).colpickSetColor(this.value) ;})
-	$('#picker2').colpick({
-		layout:'hex',
-		submit:0,
-		color: color2,
-		onChange: function (hsb,hex,rgb,el){
-			$(el).css('background-color', '#'+hex);
-			$(".row-2").css('background-color', '#'+hex);
-		}
-	}).keyup(function(){
-		$(this).colpickSetColor(this.value) ;})
+	function createColorPicker(i){
+		$('#picker' + i).colpick({
+			layout:'hex',
+			submit:0,
+			color: model.colors[i].color,
+			onChange: function (hsb,hex,rgb,el){
+				$(el).css('background-color', '#'+hex);
+				$(".row-" + i).css('background-color', '#'+hex);
+			}
+		}).keyup(function(){
+			$(this).colpickSetColor(this.value) ;})
+		$("#picker" + i).css('background-color', '#'+model.colors[i].color);	
+	}
 
-
-	function generateRows(n){
+	function generateRows(){
+		var r = new Random(Random.engines.mt19937().autoSeed());
 		var randomRows = [];
-		for (var i = 0; i < n; i++){
-			var rowClass = "1";
-			if (Math.random() < 0.5 ){
-				rowClass = "2";
-			}		
+		var samplePool = [];
+		for (var i = 0; i < model.colors.length; i++){
+			for (var j = 0; j < model.colors[i].weight; j ++){
+				samplePool.push(i);
+			}
+		}		
+		for (var i = 0; i < model.nrows; i++){
+			var rowClass = r.pick(samplePool);
 			randomRows.push(rowClass);
 		}
-		return randomRows;
+		model.rows = randomRows;
 	}
 	
-	function drawRows(rowColors){
+	function drawRows(){
+		var rowColors = model.rows;
 		var rowsHTML = "";
-		for (var i = 0; i < rowColors.length; i++){
-		
+		for (var i = 0; i < rowColors.length; i++){		
 			rowsHTML += '<div color="'+rowColors[i]+'" class="row-' + rowColors[i] + ' colorrow"></div>'
-
 		}
-		$("#pattern").html(rowsHTML);		
+		$("#pattern").html(rowsHTML);
+		for (var i = 0; i < model.colors.length; i ++){
+			$(".row-" + i).css('background-color', '#'+model.colors[i].color);
+		}
 	}
 
-	function createInstructions(rowcolors){
-		//var rowcolors = $("#pattern").children().get().reverse();
+	function createInstructions(){
+		var rowColors = model.rows.reverse();
 		var tableHeader = "<thead><th>Row #</th><th>Color</th></thead>";
 		var instructions = "<table class='table'>"+tableHeader+"<tbody>";
-		var prevColor = rowcolors[0];
+		var prevColor = rowColors[0];
 		var startRow = 0;
-		for (var i = 0; i < rowcolors.length; i++){
-			var currentColor = rowcolors[i];
+		for (var i = 0; i < rowColors.length; i++){
+			var currentColor = rowColors[i];
 			if (prevColor != currentColor){
 				if (startRow + 1 == i){
-					instructions += "<tr><td>" + (startRow + 1) + ":</td><td> Color " + prevColor + "</td></tr>";  
+					instructions += "<tr><td>" + (startRow + 1) + ":</td><td> Color " + (prevColor + 1) + "</td></tr>";  
 				} else {				 
-					instructions += "<tr><td>" + (startRow + 1) +"-"+ i + ":</td><td> Color " + prevColor + "</td></tr>";
+					instructions += "<tr><td>" + (startRow + 1) +"-"+ i + ":</td><td> Color " + (prevColor + 1) + "</td></tr>";
 				}
 				startRow = i;
 			}
-			if (i == rowcolors.length - 1){
+			if (i == rowColors.length - 1){
 				if (startRow == i){
-					instructions += "<tr><td>" + (i + 1) + ":</td><td> Color " + currentColor + "</td></tr>";  
+					instructions += "<tr><td>" + (i + 1) + ":</td><td> Color " + (currentColor + 1) + "</td></tr>";  
 				} else {				 
-					instructions += "<tr><td>" + (startRow + 1) +"-"+ (i + 1) + ":</td><td> Color " + currentColor + "</td></tr>";
+					instructions += "<tr><td>" + (startRow + 1) +"-"+ (i + 1) + ":</td><td> Color " + (currentColor + 1) + "</td></tr>";
 				}				
 			}
 			prevColor = currentColor;
@@ -129,26 +151,26 @@ $("document").ready(function(){
 		instructions += "</tbody></table>";
 		$("#instructions").html(instructions);
 	}
+		
+	function regenerate(){
+		generateRows();
+		drawRows();
+		createInstructions();
+	}
+	
+	for (var i = 0; i < model.colors.length; i ++){
+		createColorPicker(i);
+	}
 	
 	var nrowsEl = $("#nrows");
 	var onNrowsChange = function (){
 		var n =  nrowsEl.val();
-		regenerate(n);
+		model.nrows = n;
+		regenerate();
 	};
 	nrowsEl.keyup(_.debounce(onNrowsChange, 500));
-	
-	function regenerate(n){
-		var rows = generateRows(n);
-		drawRows(rows);
-		createInstructions(rows);
-		$(".row-1").css('background-color', '#'+color1);
-		$(".row-2").css('background-color', '#'+color2);
-	}
-	
-	regenerate(100);
-	$("#picker1").css('background-color', '#'+color1);
-	$("#picker2").css('background-color', '#'+color2);
-	
+
+	regenerate();
 } );
 	</script>
 </div> 
