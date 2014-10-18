@@ -39,17 +39,12 @@
 	stripe generator</a>, but I found hard to use and it didn't match my need. So 
 	I decided to make my own pattern generator. I'd love to hear if you actually use my generator for any projects 
 	so please let me know!
+	<br><a href="https://github.com/seirene/randomstripes">Project pages on github.</a>
 	</div>
+
+	<h3 >Colors</h3>
  
 	<div class="row" id="pickers">
-		<div class="col-xs-2 col-md-1 colorlabel">
-			<div id="picker0" class="colorpicker" ><i class="glyphicon glyphicon-edit"></i> </div>
-			Color 1
-		</div>
-		<div class="col-xs-2 col-md-1 colorlabel">			
-			<div id="picker1" class="colorpicker" ><i class="glyphicon glyphicon-edit"></i> </div>			
-			Color 2
-		</div>
 	</div>
 	
 	<h3 data-target="#settings" data-toggle="collapse">Settings</h3>
@@ -74,7 +69,9 @@ $("document").ready(function(){
 	var model = {
 		colors: [
 			{color:"1b9117", weight:1}, 
-			{color:"b3e8dc", weight:1}
+			//{color:"b3e8dc", weight:1},
+			//{color:"cf69cf", weight:1},
+			{color:"000000", weight:1}
 		],
 		rows: [],
 		nrows: 100,
@@ -82,6 +79,11 @@ $("document").ready(function(){
 	};
 	
 	function createColorPicker(i){
+		$('#pickers').append( 
+			"<div class='col-xs-2 col-md-1 colorlabel'>" +
+				"<div id='picker"+i+"' class='colorpicker'><i class='glyphicon glyphicon-edit'></i> </div>" +
+			"Color "+ (i + 1) +
+			"</div>");
 		$('#picker' + i).colpick({
 			layout:'hex',
 			submit:0,
@@ -89,6 +91,7 @@ $("document").ready(function(){
 			onChange: function (hsb,hex,rgb,el){
 				$(el).css('background-color', '#'+hex);
 				$(".row-" + i).css('background-color', '#'+hex);
+				model.colors[i].color = hex;
 			}
 		}).keyup(function(){
 			$(this).colpickSetColor(this.value) ;})
