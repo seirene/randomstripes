@@ -20,9 +20,10 @@
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
 
 	<!-- Optional theme -->
-	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">	
 </head>
 <body>
+
 <div class="container">
     <h1>Random stripes</h1>
 
@@ -33,35 +34,45 @@
 	<script src="vendor/colpick.js" type="text/javascript"></script>
 	<script src="vendor/random.min.js" type="text/javascript"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.7.0/underscore-min.js"></script>
- 
+	<div class="row">
+	<div class="col-xs-9 col-md-6">
+	<h3 >About</h3>
 	<div>This is a random stripe pattern generator for knitting and crochet works.
 	The inspiration came from <a href="http://www.biscuitsandjam.com/stripe_maker.php"> Biscuits and Jam 
 	stripe generator</a>, but I found hard to use and it didn't match my need. So 
 	I decided to make my own pattern generator. I'd love to hear if you actually use my generator for any projects 
 	so please let me know!
-	<br><a href="https://github.com/seirene/randomstripes">Project pages on github.</a>
+	<br><a href="https://github.com/seirene/randomstripes">Project page on github.</a>
 	</div>
 
 	<h3 >Colors</h3>
  
 	<div class="row" id="pickers">
 	</div>
+	<button id="addColorButton" type="button" class="btn btn-default">
+	  Add color
+	</button>
+	<button id="removeColorButton" type="button" class="btn btn-default">
+	  Remove color
+	</button>
 	
 	<h3 data-target="#settings" data-toggle="collapse">Settings</h3>
 	<div class="form-group collapse in" id="settings">
 		<input type="text" id="nrows" value="100" size="3" maxlength="3" class="form-control"> rows
 	</div>
-	
-	<div class="container">
+	</div>
+	<div class="col-xs-3 col-md-6">
 	<div class="row">
 	<h3 data-target="#pattern" data-toggle="collapse">Pattern Preview</h3>
 		<div id="pattern" class="col-xs-12">
 		</div>
+	</div>
+	</div>
+	</div>
 	<h3 data-target="#instructions" data-toggle="collapse">Instructions</h3>
-		<div id="instructions" class="collapse in">
-		</div>
+	<div id="instructions" class="collapse in">
 	</div>
-	</div>
+
 	<script type="text/javascript">
 $("document").ready(function(){
 	var color1 = "1b9117";
@@ -69,9 +80,12 @@ $("document").ready(function(){
 	var model = {
 		colors: [
 			{color:"1b9117", weight:1}, 
-			//{color:"b3e8dc", weight:1},
-			//{color:"cf69cf", weight:1},
 			{color:"000000", weight:1}
+		],
+		hiddenColors: [
+			{color:"b3e8dc", weight:1},
+			{color:"cf69cf", weight:1},		
+			{color:"ffffff", weight:1}		
 		],
 		rows: [],
 		nrows: 100,
@@ -80,7 +94,7 @@ $("document").ready(function(){
 	
 	function createColorPicker(i){
 		$('#pickers').append( 
-			"<div class='col-xs-2 col-md-1 colorlabel'>" +
+			"<div class='col-xs-2 colorlabel'>" +
 				"<div id='picker"+i+"' class='colorpicker'><i class='glyphicon glyphicon-edit'></i> </div>" +
 			"Color "+ (i + 1) +
 			"</div>");
@@ -161,9 +175,36 @@ $("document").ready(function(){
 		createInstructions();
 	}
 	
-	for (var i = 0; i < model.colors.length; i ++){
-		createColorPicker(i);
+	function addColorPicker(){
+		var newColor = model.hiddenColors.shift();
+		model.colors.push(newColor);
+		createColorPickers();
 	}
+
+	function removeColorPicker(){
+		var newColor = model.colors.pop();
+		model.hiddenColors.unshift(newColor);
+		createColorPickers();
+	}
+	
+	function createColorPickers(){
+		$('#pickers').html("");
+		for (var i = 0; i < model.colors.length; i ++){
+			createColorPicker(i);
+		}	
+	}
+
+	createColorPickers();
+	
+	$("#addColorButton").click(function(){
+		addColorPicker();
+		regenerate();
+	});
+	$("#removeColorButton").click(function(){
+		removeColorPicker();
+		regenerate();
+	});
+	
 	
 	var nrowsEl = $("#nrows");
 	var onNrowsChange = function (){
