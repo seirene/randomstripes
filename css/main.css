@@ -7,6 +7,10 @@
 	line-height:5.5em;
 	padding-right: 2px;
 }
+#pickers input{
+	width:50px;
+	padding: 0px 0px 0px 6px;
+}
 .colorrow {
 	width:100%; 
 	height:5px;

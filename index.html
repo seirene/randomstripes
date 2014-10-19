@@ -57,7 +57,7 @@
 
 	<h3 >Colors</h3>
  
-	<div class="row" id="pickers">
+	<div class="row form-group" id="pickers">
 	</div>
 	<button id="addColorButton" type="button" class="btn btn-default">
 	  Add color
@@ -94,8 +94,9 @@ $("document").ready(function(){
 		],
 		hiddenColors: [
 			{color:"b3e8dc", weight:1},
-			{color:"cf69cf", weight:1},		
-			{color:"ffffff", weight:1}		
+			{color:"cf69cf", weight:1},
+			{color:"990099", weight:1},
+			{color:"ffffff", weight:1}
 		],
 		rows: [],
 		nrows: 100,
@@ -105,8 +106,9 @@ $("document").ready(function(){
 	function createColorPicker(i){
 		$('#pickers').append( 
 			"<div class='col-xs-2 colorlabel'>" +
-				"<div id='picker"+i+"' class='colorpicker'><i class='glyphicon glyphicon-edit'></i> </div>" +
 			"Color "+ (i + 1) +
+				"<div id='picker"+i+"' class='colorpicker'><i class='glyphicon glyphicon-edit'></i> </div>" +
+			"Weight:<input id='weight"+i+"' class='form-control' type='number' maxlength='2' value='" + model.colors[i].weight + "'>" +	
 			"</div>");
 		$('#picker' + i).colpick({
 			layout:'hex',
@@ -119,7 +121,11 @@ $("document").ready(function(){
 			}
 		}).keyup(function(){
 			$(this).colpickSetColor(this.value) ;})
-		$("#picker" + i).css('background-color', '#'+model.colors[i].color);	
+		$("#picker" + i).css('background-color', '#'+model.colors[i].color);
+		$("#weight" + i).change(function(){
+			model.colors[i].weight = $(this).val();
+			regenerate();
+		});
 	}
 
 	function generateRows(){
