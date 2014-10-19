@@ -186,15 +186,33 @@ $("document").ready(function(){
 	}
 	
 	function addColorPicker(){
-		var newColor = model.hiddenColors.shift();
-		model.colors.push(newColor);
-		createColorPickers();
+		if (model.hiddenColors.length > 0){
+			var newColor = model.hiddenColors.shift();
+			model.colors.push(newColor);
+			createColorPickers();
+		}
+		checkColorButtonStates();
 	}
 
 	function removeColorPicker(){
-		var newColor = model.colors.pop();
-		model.hiddenColors.unshift(newColor);
-		createColorPickers();
+		if (model.colors.length > 1){
+			var newColor = model.colors.pop();
+			model.hiddenColors.unshift(newColor);
+			createColorPickers();		
+		}
+		checkColorButtonStates();
+	}
+	function checkColorButtonStates(){
+		if (model.colors.length <= 1){
+			$("#removeColorButton").prop("disabled", true);
+		}
+		else if (model.hiddenColors.length <= 0){
+			$("#addColorButton").prop("disabled", true);
+		}
+		else {
+			$("#removeColorButton").prop("disabled", false);
+			$("#addColorButton").prop("disabled", false);
+		}
 	}
 	
 	function createColorPickers(){
